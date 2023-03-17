@@ -33,7 +33,14 @@ module.exports = {
         return res.status(401).json({message: "Invalid credentials"})
       }
 
-      return res.status(200).json({message: "User Found", user})
+      const userToSend = {
+        username: user.username,
+        fullname: user.fullname,
+        emailaddress: user.emailaddress,
+        id: user._id
+      };
+
+      return res.status(200).json({message: "User Found", user: userToSend})
     } catch (error){
       return res.status(500).json({message: error.message})
     }
