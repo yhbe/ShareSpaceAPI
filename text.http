@@ -1,9 +1,18 @@
-POST http://localhost:5000/users
-Content-Type: application/json
+# POST http://localhost:5000/users
+# Content-Type: application/json
 
-{
-  "username": "username32",
-  "fullname": "Bob Joe",
-  "emailaddress": "Bobjoe@gmail.com",
-  "password": "bob123"
-}
+# {
+#   "username": "username32",
+#   "fullname": "Bob Joe",
+#   "emailaddress": "Bobjoe@gmail.com",
+#   "password": "bob123"
+# }
+
+
+# POST http://localhost:5000/users/login
+# Content-Type: application/json
+
+# {
+#   "username": "test",
+#   "password": "test"
+# }
