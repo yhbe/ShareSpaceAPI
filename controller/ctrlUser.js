@@ -7,15 +7,31 @@ module.exports = {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
+        const initials = req.body.username
+          .split(" ")
+          .map((name) => name[0])
+          .join("");
+        const profilePictureUrl = `https://ui-avatars.com/api/?background=random&color=fff&name=${initials}&rounded=true`;
+
       const newUser = new User({
         username: req.body.username,
         fullname: req.body.fullname,
         emailaddress: req.body.emailaddress,
+        profilepicture: profilePictureUrl,
         password: hashedPassword,
       });
 
       await newUser.save();
-      return res.status(201).json({ message: "User created", newUser });
+
+      const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+        expiresIn: "3h",
+      });
+
+      return res.status(201)
+                .cookie("logInToken", token, {
+          httpOnly: true,
+          secure: true
+        })       .json({ message: "User created", newUser });
     } catch (error) {
       return res.status(404).json({ message: error.message });
     }
@@ -38,6 +54,7 @@ module.exports = {
         username: user.username,
         fullname: user.fullname,
         emailaddress: user.emailaddress,
+        profilepicture: user.profilepicture,
         id: user._id,
       };
 
@@ -51,7 +68,7 @@ module.exports = {
           httpOnly: true,
           secure: true
         })
-        .json({ message: "User Found", user: userToSend, token });
+        .json({ message: "User Found", user: userToSend });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
@@ -71,6 +88,7 @@ module.exports = {
         username: user.username,
         fullname: user.fullname,
         emailaddress: user.emailaddress,
+        profilepicture: user.profilepicture,
         id: user._id,
       };
       return res.status(200).json({ message: "User Found", user: userToSend });
