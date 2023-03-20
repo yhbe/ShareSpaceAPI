@@ -7,5 +7,6 @@ router.get("/", controller.getAllUsers)
 router.post("/logout", controller.logOut)
 router.post("/login", controller.verifyUser)
 router.get("/loginWithCookies", controller.tryLoginWithCookies)
+router.post("/userPost", controller.userPost)
 
 module.exports = router

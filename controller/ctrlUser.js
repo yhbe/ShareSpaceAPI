@@ -7,11 +7,11 @@ module.exports = {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-        const initials = req.body.username
-          .split(" ")
-          .map((name) => name[0])
-          .join("");
-        const profilePictureUrl = `https://ui-avatars.com/api/?background=random&color=fff&name=${initials}&rounded=true`;
+      const initials = req.body.username
+        .split(" ")
+        .map((name) => name[0])
+        .join("");
+      const profilePictureUrl = `https://ui-avatars.com/api/?background=random&color=fff&name=${initials}&rounded=true`;
 
       const newUser = new User({
         username: req.body.username,
@@ -27,11 +27,13 @@ module.exports = {
         expiresIn: "3h",
       });
 
-      return res.status(201)
-                .cookie("logInToken", token, {
+      return res
+        .status(201)
+        .cookie("logInToken", token, {
           httpOnly: true,
-          secure: true
-        })       .json({ message: "User created", newUser });
+          secure: true,
+        })
+        .json({ message: "User created", newUser });
     } catch (error) {
       return res.status(404).json({ message: error.message });
     }
@@ -55,6 +57,7 @@ module.exports = {
         fullname: user.fullname,
         emailaddress: user.emailaddress,
         profilepicture: user.profilepicture,
+        posts: user.posts || [],
         id: user._id,
       };
 
@@ -66,7 +69,7 @@ module.exports = {
         .status(200)
         .cookie("logInToken", token, {
           httpOnly: true,
-          secure: true
+          secure: true,
         })
         .json({ message: "User Found", user: userToSend });
     } catch (error) {
@@ -77,7 +80,7 @@ module.exports = {
     try {
       const token = req.cookies.logInToken;
       if (!token) {
-        return res.status(401)
+        return res.status(401);
       }
       const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decodedToken.userId);
@@ -89,6 +92,7 @@ module.exports = {
         fullname: user.fullname,
         emailaddress: user.emailaddress,
         profilepicture: user.profilepicture,
+        posts: user.posts || [],
         id: user._id,
       };
       return res.status(200).json({ message: "User Found", user: userToSend });
@@ -99,7 +103,7 @@ module.exports = {
       return res.status(500).json({ message: error.message });
     }
   },
-  logOut: async(req,res) => {
+  logOut: async (req, res) => {
     try {
       res.clearCookie("logInToken");
       return res.status(200).json({ message: "User logged out successfully" });
@@ -107,7 +111,7 @@ module.exports = {
       return res.status(500).json({ message: error.message });
     }
   },
-  getAllUsers: async(req,res) => {
+  getAllUsers: async (req, res) => {
     try {
       const allUsers = await User.find();
       res.status(200).json(allUsers);
@@ -115,5 +119,30 @@ module.exports = {
       console.error(error);
       res.status(500).json({ error: "Internal server error" });
     }
-  }
+  },
+  userPost: async (req, res) => {
+    try {
+      const authorId = req.body.author
+      const content = req.body.content
+      const user = await User.findOne({ _id: authorId})
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      user.posts = user.posts || []
+      
+      const post = {
+        content: content,
+        likes: [],
+        comments: []
+      }
+
+      user.posts.push(post)
+      await user.save()
+      return res.status(200).json({ message: "Post added successfully" })
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
 };
