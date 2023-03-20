@@ -1,6 +1,7 @@
 const User = require("../models/userBlog")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
+const {v4: uuidv4} = require("uuid")
 
 module.exports = {
   post: async (req, res) => {
@@ -135,7 +136,8 @@ module.exports = {
       const post = {
         content: content,
         likes: [],
-        comments: []
+        comments: [],
+        _id: uuidv4(),
       }
 
       user.posts.push(post)
