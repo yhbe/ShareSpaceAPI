@@ -4,6 +4,7 @@ const postSchema = new mongoose.Schema({
   likes: {type: Array},
   comments: {type: Array},
   content: {type: String},
+  profilepicture: {type: String},
   id: {type: String}
 })
 

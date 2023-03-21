@@ -123,57 +123,90 @@ module.exports = {
   },
   userPost: async (req, res) => {
     try {
-      const authorId = req.body.author
-      const content = req.body.content
-      const user = await User.findOne({ _id: authorId})
+      const authorId = req.body.author;
+      const content = req.body.content;
+      const user = await User.findOne({ _id: authorId });
 
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      user.posts = user.posts || []
-      
+      user.posts = user.posts || [];
+
       const post = {
         content: content,
         likes: [],
         comments: [],
-      }
+      };
 
-      user.posts.push(post)
-      await user.save()
-      
-      return res.status(200).json({ message: "Post added successfully" })
+      user.posts.push(post);
+      await user.save();
+
+      return res.status(200).json({ message: "Post added successfully" });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   },
-  addComment: async(req, res) => {
-  try {
-    const { postid, postindex, postuser } = req.body;
-    
-    const user = await User.findById(postuser);
+  addComment: async (req, res) => {
+    try {
+      const { postid, postindex, postuser, userprofilepicture } = req.body;
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      const user = await User.findById(postuser);
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const commentText = req.body.usercomment;
+
+      const comment = {
+        user: req.body.user,
+        userid: req.body.userid,
+        text: commentText,
+        profilepicture: userprofilepicture,
+        id: uuidv4(),
+      };
+
+      user.posts[postindex].comments.push(comment);
+
+      await user.save();
+
+      return res.status(200).json({ message: "Comment added successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
     }
-    
-    const commentText = req.body.usercomment;
+  },
+  deleteComment: async (req, res) => {
+    try {
+      const { commentId, postId, userId } = req.body;
 
-    const comment = {
-      user: req.body.user,
-      userid: req.body.userid,
-      text: commentText,
-      id: uuidv4()
-    };
+      const user = await User.findById(userId);
 
-    user.posts[postindex].comments.push(comment);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
 
-    await user.save();
+      const post = user.posts.id(postId);
 
-    return res.status(200).json({ message: "Comment added successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      
+      const comment = post.comments.find(comment => comment.id === commentId)
+
+      if (!comment) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+
+      post.comments.pull(comment)
+
+      await user.save();
+
+      return res.status(200).json({ message: "Comment deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
 };
