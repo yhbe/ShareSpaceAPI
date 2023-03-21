@@ -10,4 +10,5 @@ router.get("/loginWithCookies", controller.tryLoginWithCookies)
 router.post("/userPost", controller.userPost)
 router.post("/addComment", controller.addComment)
 router.delete("/deleteComment", controller.deleteComment)
+router.delete("/deletePost", controller.deletePost)
 module.exports = router

@@ -192,20 +192,46 @@ module.exports = {
       if (!post) {
         return res.status(404).json({ error: "Post not found" });
       }
-      
-      const comment = post.comments.find(comment => comment.id === commentId)
+
+      const comment = post.comments.find((comment) => comment.id === commentId);
 
       if (!comment) {
         return res.status(404).json({ error: "Comment not found" });
       }
 
-      post.comments.pull(comment)
+      post.comments.pull(comment);
 
       await user.save();
 
       return res.status(200).json({ message: "Comment deleted successfully" });
     } catch (error) {
       console.error(error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+  deletePost: async (req, res) => {
+    try {
+
+    const {postId, userId } = req.body;
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const postIndex = user.posts.findIndex((post) => post._id == postId);
+
+      if (postIndex < 0) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+
+      user.posts.splice(postIndex, 1);
+
+      await user.save();
+
+      return res.status(200).json({ message: "Post deleted successfully" });
+    } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   },
