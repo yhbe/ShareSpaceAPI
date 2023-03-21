@@ -8,5 +8,5 @@ router.post("/logout", controller.logOut)
 router.post("/login", controller.verifyUser)
 router.get("/loginWithCookies", controller.tryLoginWithCookies)
 router.post("/userPost", controller.userPost)
-
+router.post("/addComment", controller.addComment)
 module.exports = router

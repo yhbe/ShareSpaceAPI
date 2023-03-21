@@ -137,14 +137,43 @@ module.exports = {
         content: content,
         likes: [],
         comments: [],
-        _id: uuidv4(),
       }
 
       user.posts.push(post)
       await user.save()
+      
       return res.status(200).json({ message: "Post added successfully" })
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+  addComment: async(req, res) => {
+  try {
+    const { postid, postindex, postuser } = req.body;
+    
+    const user = await User.findById(postuser);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const commentText = req.body.usercomment;
+
+    const comment = {
+      user: req.body.user,
+      userid: req.body.userid,
+      text: commentText,
+      id: uuidv4()
+    };
+
+    user.posts[postindex].comments.push(comment);
+
+    await user.save();
+
+    return res.status(200).json({ message: "Comment added successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
 };
