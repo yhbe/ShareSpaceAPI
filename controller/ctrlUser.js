@@ -20,6 +20,7 @@ module.exports = {
         emailaddress: req.body.emailaddress,
         profilepicture: profilePictureUrl,
         password: hashedPassword,
+        friends: [],
       });
 
       await newUser.save();
@@ -58,7 +59,8 @@ module.exports = {
         fullname: user.fullname,
         emailaddress: user.emailaddress,
         profilepicture: user.profilepicture,
-        posts: user.posts || [],
+        posts: user.posts,
+        friends: user.friends,
         id: user._id,
       };
 
@@ -93,7 +95,8 @@ module.exports = {
         fullname: user.fullname,
         emailaddress: user.emailaddress,
         profilepicture: user.profilepicture,
-        posts: user.posts || [],
+        posts: user.posts,
+        friends: user.friends,
         id: user._id,
       };
       return res.status(200).json({ message: "User Found", user: userToSend });
@@ -211,8 +214,7 @@ module.exports = {
   },
   deletePost: async (req, res) => {
     try {
-
-    const {postId, userId } = req.body;
+      const { postId, userId } = req.body;
 
       const user = await User.findById(userId);
 
@@ -232,6 +234,44 @@ module.exports = {
 
       return res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+  sendFriendRequest: async (req, res) => {
+    try {
+      const { userId, loggedInUserId } = req.body;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const targetUser = await User.findById(loggedInUserId);
+      if (!targetUser) {
+        return res.status(404).json({ error: "Target user not found" });
+      }
+
+      // Add the friend request to the target user's list
+      targetUser.friends.push({
+        userId: userId,
+        status: "pending",
+        receiver: true
+      });
+      await targetUser.save();
+
+      // Add the sent friend request to the current user's list
+      user.friends.push({
+        userId: targetUser.id,
+        status: "pending",
+        receiver: false
+      });
+      await user.save();
+
+      return res
+        .status(200)
+        .json({ message: "Friend request sent successfully" });
+    } catch (error) {
+      console.error(error);
       res.status(500).json({ error: "Internal server error" });
     }
   },

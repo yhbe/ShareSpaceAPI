@@ -11,4 +11,5 @@ router.post("/userPost", controller.userPost)
 router.post("/addComment", controller.addComment)
 router.delete("/deleteComment", controller.deleteComment)
 router.delete("/deletePost", controller.deletePost)
+router.post("/sendFriendRequest", controller.sendFriendRequest);
 module.exports = router
