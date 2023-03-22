@@ -312,8 +312,6 @@ module.exports = {
       
       sentRequest.status = "accepted";
       await user.save();
-      console.log(targetUser, "targetUser")
-      console.log(user, "user")
       return res
         .status(200)
         .json({ message: "Friend request accepted successfully" });
