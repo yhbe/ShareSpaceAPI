@@ -255,7 +255,7 @@ module.exports = {
       targetUser.friends.push({
         userId: userId,
         status: "pending",
-        receiver: true
+        receiver: true,
       });
       await targetUser.save();
 
@@ -263,13 +263,60 @@ module.exports = {
       user.friends.push({
         userId: targetUser.id,
         status: "pending",
-        receiver: false
+        receiver: false,
       });
       await user.save();
 
       return res
         .status(200)
         .json({ message: "Friend request sent successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+  acceptFriendRequest: async (req, res) => {
+    try {
+      const { userId, loggedInUserId } = req.body;
+
+      const user = await User.findById(loggedInUserId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const targetUser = await User.findById(userId);
+      if (!targetUser) {
+        return res.status(404).json({ error: "Target user not found" });
+      }
+
+      const friendRequest = targetUser.friends.find(
+        (friend) =>
+          friend.userId === loggedInUserId &&
+          friend.status === "pending"
+      );
+      if (!friendRequest) {
+        return res.status(404).json({ error: "Friend request not found" });
+      }
+
+      friendRequest.status = "accepted";
+      await targetUser.save();
+
+      const sentRequest = user.friends.find(
+        (friend) =>
+          friend.userId === userId &&
+          friend.status === "pending"
+      );
+      if (!sentRequest) {
+        return res.status(404).json({ error: "Sent friend request not found" });
+      }
+      
+      sentRequest.status = "accepted";
+      await user.save();
+      console.log(targetUser, "targetUser")
+      console.log(user, "user")
+      return res
+        .status(200)
+        .json({ message: "Friend request accepted successfully" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal server error" });
