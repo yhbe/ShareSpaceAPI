@@ -34,6 +34,7 @@ module.exports = {
         .cookie("logInToken", token, {
           httpOnly: true,
           secure: true,
+          sameSite: "none",
         })
         .json({ message: "User created", newUser });
     } catch (error) {
@@ -73,6 +74,7 @@ module.exports = {
         .cookie("logInToken", token, {
           httpOnly: true,
           secure: true,
+          sameSite: "none",
         })
         .json({ message: "User Found", user: userToSend });
     } catch (error) {
@@ -109,7 +111,11 @@ module.exports = {
   },
   logOut: async (req, res) => {
     try {
-      res.clearCookie("logInToken");
+      res.clearCookie("logInToken", {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+      });
       return res.status(200).json({ message: "User logged out successfully" });
     } catch (error) {
       return res.status(500).json({ message: error.message });
