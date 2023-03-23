@@ -17,6 +17,6 @@ app.use(bodyParser.urlencoded({extended: true}))
 const userRoute = require("./routes/user")
 app.use("/users", userRoute)
 
-app.listen(5000, () => {
+app.listen(port, () => {
   console.log(`Listening on port ${port}`)
 })
